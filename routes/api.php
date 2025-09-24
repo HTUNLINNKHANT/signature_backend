@@ -19,6 +19,16 @@ use App\Http\Controllers\Api\CheckoutController;
 use App\Http\Controllers\Api\AdminOrderController;
 use App\Http\Controllers\Api\UserOrderController;
 
+// Health check endpoint for Render
+Route::get('health', function () {
+    return response()->json([
+        'status' => 'ok',
+        'timestamp' => now(),
+        'app' => config('app.name'),
+        'version' => '1.0.0'
+    ]);
+});
+
 // CORS preflight handling
 Route::options('{any}', function () {
     return response('', 200)
