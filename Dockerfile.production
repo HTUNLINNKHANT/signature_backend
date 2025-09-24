@@ -82,10 +82,10 @@ RUN mkdir -p \
     && chmod -R 775 storage bootstrap/cache
 
 # Make scripts executable
-RUN chmod +x start.sh
+RUN chmod +x start.sh start-simple.sh
 
 # Expose port
 EXPOSE $PORT
 
 # Start application
-CMD ["./start.sh"]
+CMD ["./start-simple.sh"]
