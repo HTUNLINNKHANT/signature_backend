@@ -28,7 +28,7 @@ return new class extends Migration
             $table->string('is_active')->default(1);
             $table->string('applies_to')->default("all");
             $table->text('conditions')->nullable();
-            $table->string('created_by');
+            $table->foreignId('created_by');
             $table->dateTime('created_at')->nullable();
             $table->dateTime('updated_at')->nullable();
             $table->unique('slug', 'promotions_slug_unique');

@@ -36,7 +36,7 @@ return new class extends Migration
             $table->decimal('delivery_fee', 15, 2)->default(0);
             $table->foreignId('township_delivery_id')->nullable();
             $table->foreignId('shipping_address_id')->nullable();
-            $table->string('approved_by')->nullable();
+            $table->foreignId('approved_by')->nullable();
             $table->dateTime('approved_at')->nullable();
             $table->text('rejection_reason')->nullable();
             $table->index(['user_id', 'status'], 'orders_user_id_status_index');
