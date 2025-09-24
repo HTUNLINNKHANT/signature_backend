@@ -34,7 +34,7 @@ WORKDIR /var/www/html
 COPY . /var/www/html
 
 # Make scripts executable
-RUN chmod +x build.sh start.sh wait-for-db.sh health-check.sh debug-composer.sh fix-composer-lock.sh
+RUN chmod +x build.sh start.sh wait-for-db.sh health-check.sh debug-composer.sh fix-composer-lock.sh debug-deployment.sh
 
 # Run the build script which handles composer install with fallbacks
 RUN ./build.sh

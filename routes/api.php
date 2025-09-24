@@ -25,7 +25,19 @@ Route::get('health', function () {
         'status' => 'ok',
         'timestamp' => now(),
         'app' => config('app.name'),
-        'version' => '1.0.0'
+        'version' => '1.0.0',
+        'environment' => config('app.env'),
+        'debug' => config('app.debug')
+    ]);
+});
+
+// Simple status endpoint without database dependency
+Route::get('status', function () {
+    return response()->json([
+        'status' => 'running',
+        'timestamp' => now()->toISOString(),
+        'php_version' => PHP_VERSION,
+        'laravel_version' => app()->version()
     ]);
 });
 

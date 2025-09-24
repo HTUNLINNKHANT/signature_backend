@@ -8,6 +8,8 @@ use App\Models\Role;
 use App\Models\Permission;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class RolePermissionSeeder extends Seeder
 {
@@ -16,7 +18,10 @@ class RolePermissionSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create Permissions
+        try {
+            DB::beginTransaction();
+            
+            // Create Permissions
         $permissions = [
             // Product Management
             ['name' => 'products.view', 'display_name' => 'View Products', 'description' => 'View product listings', 'category' => 'products'],
@@ -153,5 +158,14 @@ class RolePermissionSeeder extends Seeder
         );
         
         $customerUser->roles()->sync([$customerRole->id]);
+        
+        DB::commit();
+        Log::info('RolePermissionSeeder completed successfully');
+        
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('RolePermissionSeeder failed: ' . $e->getMessage());
+            throw $e;
+        }
     }
 }
