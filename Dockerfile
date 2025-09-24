@@ -1,5 +1,5 @@
-# Use PHP 8.3 CLI to match composer.lock requirements
-FROM php:8.3-cli
+# Use PHP 8.2 CLI to match composer.json requirements
+FROM php:8.2-cli
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -25,7 +25,7 @@ RUN echo "memory_limit = 512M" >> /usr/local/etc/php/conf.d/memory.ini \
 
 # Get latest Composer and set memory limit
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-ENV COMPOSER_MEMORY_LIMIT=512M
+ENV COMPOSER_MEMORY_LIMIT=1
 
 # Set working directory
 WORKDIR /var/www/html
@@ -34,7 +34,7 @@ WORKDIR /var/www/html
 COPY . /var/www/html
 
 # Make scripts executable
-RUN chmod +x build.sh start.sh wait-for-db.sh health-check.sh debug-composer.sh fix-composer-lock.sh debug-deployment.sh
+RUN chmod +x build.sh start.sh start-simple.sh wait-for-db.sh health-check.sh debug-composer.sh fix-composer-lock.sh debug-deployment.sh
 
 # Run the build script which handles composer install with fallbacks
 RUN ./build.sh
@@ -51,4 +51,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD ./health-check.sh || exit 1
 
 # Start Laravel application
-CMD ["./start.sh"]
+CMD ["./start-simple.sh"]
