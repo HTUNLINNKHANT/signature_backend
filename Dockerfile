@@ -1,5 +1,5 @@
-# Use PHP 8.2 CLI for simplicity
-FROM php:8.2-cli
+# Use PHP 8.3 CLI to match composer.lock requirements
+FROM php:8.3-cli
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -34,7 +34,7 @@ WORKDIR /var/www/html
 COPY . /var/www/html
 
 # Make scripts executable
-RUN chmod +x build.sh start.sh wait-for-db.sh health-check.sh debug-composer.sh
+RUN chmod +x build.sh start.sh wait-for-db.sh health-check.sh debug-composer.sh fix-composer-lock.sh
 
 # Run the build script which handles composer install with fallbacks
 RUN ./build.sh
