@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Delivery Fee API</title>
+</head>
+<body>
+    <h1>Delivery Fee API Test</h1>
+    <button onclick="testDeliveryFee(1)">Test Address 1</button>
+    <button onclick="testDeliveryFee(2)">Test Address 2</button>
+    <button onclick="checkToken()">Check Token</button>
+    <button onclick="setNewToken()">Set New Token</button>
+    <div id="results"></div>
+
+    <script>
+        // Auto-detect API base URL based on current location
+        const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+            ? 'http://localhost:8000/api' 
+            : `${window.location.protocol}//${window.location.hostname}/api`;
+        
+        function log(message) {
+            const results = document.getElementById('results');
+            results.innerHTML += '<div>' + new Date().toLocaleTimeString() + ': ' + message + '</div>';
+            console.log(message);
+        }
+
+        function checkToken() {
+            const token = localStorage.getItem('token');
+            const user = localStorage.getItem('user');
+            log('Token exists: ' + !!token);
+            log('Token value: ' + (token || 'null'));
+            log('User exists: ' + !!user);
+            if (user) {
+                try {
+                    const userData = JSON.parse(user);
+                    log('User ID: ' + userData.id);
+                    log('User email: ' + userData.email);
+                } catch (e) {
+                    log('Error parsing user data: ' + e.message);
+                }
+            }
+        }
+
+        function setNewToken() {
+            // Use the fresh token we generated
+            const newToken = '17|iW0VwDQIlk9FImJGmZgxIK9CEvt5WAG8YBxjFcKS5a9a1688';
+            localStorage.setItem('token', newToken);
+            log('✅ New token set: ' + newToken);
+        }
+
+        async function testDeliveryFee(addressId) {
+            log('🚀 Testing delivery fee for address ' + addressId);
+            
+            const token = localStorage.getItem('token');
+            if (!token) {
+                log('❌ No token found in localStorage');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/addresses/${addressId}/delivery-fee`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                log('Response status: ' + response.status);
+                log('Response ok: ' + response.ok);
+
+                if (response.ok) {
+                    const data = await response.json();
+                    log('✅ SUCCESS: ' + JSON.stringify(data));
+                } else {
+                    const errorData = await response.json();
+                    log('❌ ERROR: ' + JSON.stringify(errorData));
+                }
+            } catch (error) {
+                log('❌ NETWORK ERROR: ' + error.message);
+            }
+        }
+
+        // Auto-check token on load
+        window.onload = function() {
+            checkToken();
+        };
+    </script>
+</body>
+</html>
