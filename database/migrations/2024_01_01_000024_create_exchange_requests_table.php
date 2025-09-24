@@ -26,7 +26,7 @@ return new class extends Migration
             $table->text('additional_comments')->nullable();
             $table->string('status')->default("pending");
             $table->text('admin_notes')->nullable();
-            $table->string('processed_by')->nullable();
+            $table->foreignId('processed_by')->nullable();
             $table->dateTime('processed_at')->nullable();
             $table->dateTime('created_at')->nullable();
             $table->dateTime('updated_at')->nullable();
