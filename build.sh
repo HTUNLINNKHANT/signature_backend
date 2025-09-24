@@ -87,8 +87,13 @@ echo "✅ Vendor dependencies verified successfully"
 
 # Generate application key if not exists
 if [ -z "$APP_KEY" ]; then
+    echo "⚠️  APP_KEY environment variable not set!"
     echo "Generating application key..."
     php artisan key:generate --force
+    echo "✅ Application key generated"
+    echo "🔒 IMPORTANT: Set APP_KEY in your Render environment variables to persist this key"
+else
+    echo "✅ APP_KEY found in environment variables"
 fi
 
 echo "Build completed successfully!"
