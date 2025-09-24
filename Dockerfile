@@ -1,5 +1,5 @@
-# Use PHP 8.2 FPM for better web server performance
-FROM php:8.2-fpm
+# Use PHP 8.2 CLI for simplicity
+FROM php:8.2-cli
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -12,8 +12,6 @@ RUN apt-get update && apt-get install -y \
     zip \
     unzip \
     libzip-dev \
-    nginx \
-    supervisor \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -32,22 +30,15 @@ COPY . /var/www/html
 # Make scripts executable
 RUN chmod +x build.sh start.sh
 
-# Install PHP dependencies
-RUN composer install --no-dev --prefer-dist --no-progress --optimize-autoloader
+# Run the build script which handles composer install with fallbacks
+RUN ./build.sh
 
 # Create storage directories and set permissions
 RUN mkdir -p storage/logs storage/framework/cache storage/framework/sessions storage/framework/views bootstrap/cache
 RUN chmod -R 775 storage bootstrap/cache
-RUN chown -R www-data:www-data /var/www/html
-
-# Copy nginx configuration
-COPY nginx.conf /etc/nginx/sites-available/default
-
-# Copy supervisor configuration
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # Expose port (Render will set PORT environment variable)
 EXPOSE $PORT
 
-# Start services via supervisor
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+# Start Laravel application
+CMD ["./start.sh"]

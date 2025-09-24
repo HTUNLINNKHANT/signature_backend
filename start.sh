@@ -45,7 +45,7 @@ fi
 chmod -R 775 storage bootstrap/cache
 
 echo "Application setup completed successfully!"
-echo "Starting services via supervisor..."
+echo "Starting Laravel server on port $PORT..."
 
-# Start supervisor (which will start nginx and php-fpm)
-exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
+# Start the Laravel server
+exec php artisan serve --host=0.0.0.0 --port=$PORT
