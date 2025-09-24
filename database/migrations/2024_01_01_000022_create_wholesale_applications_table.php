@@ -27,7 +27,7 @@ return new class extends Migration
             $table->string('status')->default("pending");
             $table->text('admin_notes')->nullable();
             $table->dateTime('reviewed_at')->nullable();
-            $table->string('reviewed_by')->nullable();
+            $table->foreignId('reviewed_by')->nullable();
             $table->dateTime('created_at')->nullable();
             $table->dateTime('updated_at')->nullable();
             $table->index('email', 'wholesale_applications_email_index');
