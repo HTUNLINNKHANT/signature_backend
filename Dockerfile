@@ -25,7 +25,7 @@ RUN echo "memory_limit = 512M" >> /usr/local/etc/php/conf.d/memory.ini \
 
 # Get latest Composer and set memory limit
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-ENV COMPOSER_MEMORY_LIMIT=1
+ENV COMPOSER_MEMORY_LIMIT=512M
 
 # Set working directory
 WORKDIR /var/www/html
@@ -34,7 +34,7 @@ WORKDIR /var/www/html
 COPY . /var/www/html
 
 # Make scripts executable
-RUN chmod +x build.sh start.sh wait-for-db.sh health-check.sh
+RUN chmod +x build.sh start.sh wait-for-db.sh health-check.sh debug-composer.sh
 
 # Run the build script which handles composer install with fallbacks
 RUN ./build.sh

@@ -2,6 +2,28 @@
 
 echo "Starting production deployment..."
 
+# Verify vendor dependencies are installed
+echo "Checking vendor dependencies..."
+if [ ! -d "vendor" ] || [ ! -f "vendor/autoload.php" ]; then
+    echo "❌ Vendor directory missing! Running composer install..."
+    
+    # Try to install dependencies with fallback memory limits
+    MEMORY_LIMITS=("512M" "1G" "2G" "-1")
+    
+    for MEMORY_LIMIT in "${MEMORY_LIMITS[@]}"; do
+        echo "Trying composer install with memory limit: $MEMORY_LIMIT"
+        if COMPOSER_MEMORY_LIMIT=$MEMORY_LIMIT composer install --no-dev --prefer-dist --no-progress --optimize-autoloader; then
+            echo "✅ Composer install successful"
+            break
+        elif [ "$MEMORY_LIMIT" = "-1" ]; then
+            echo "❌ All composer install attempts failed!"
+            exit 1
+        fi
+    done
+else
+    echo "✅ Vendor dependencies found"
+fi
+
 # Wait for database to be ready using enhanced script
 ./wait-for-db.sh
 
