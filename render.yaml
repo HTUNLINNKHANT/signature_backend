@@ -1,0 +1,68 @@
+services:
+  - type: web
+    name: signature-backend
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: ./
+    plan: free
+    region: oregon
+    branch: main
+    healthCheckPath: /api/health
+    envVars:
+      - key: APP_NAME
+        value: Signature E-commerce
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: APP_KEY
+        generateValue: true
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: LOG_LEVEL
+        value: info
+      - key: SESSION_DRIVER
+        value: database
+      - key: CACHE_STORE
+        value: database
+      - key: QUEUE_CONNECTION
+        value: database
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        fromDatabase:
+          name: signature-database
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: signature-database
+          property: port
+      - key: DB_DATABASE
+        fromDatabase:
+          name: signature-database
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: signature-database
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: signature-database
+          property: password
+      - key: MAIL_MAILER
+        value: smtp
+      - key: MAIL_HOST
+        value: smtp.gmail.com
+      - key: MAIL_PORT
+        value: 587
+      - key: MAIL_ENCRYPTION
+        value: tls
+      - key: MAIL_FROM_NAME
+        value: Signature Store
+
+databases:
+  - name: signature-database
+    databaseName: signature_ecommerce
+    user: signature_user
+    plan: free
+    region: oregon
