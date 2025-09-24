@@ -2,12 +2,12 @@ services:
   - type: web
     name: signature-backend
     runtime: docker
-    dockerfilePath: ./Dockerfile
-    dockerContext: ./
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
     plan: free
     region: oregon
     branch: main
-    healthCheckPath: /api/health
+    healthCheckPath: /up
     envVars:
       - key: APP_NAME
         value: Signature E-commerce
@@ -16,13 +16,15 @@ services:
       - key: APP_DEBUG
         value: false
       - key: APP_KEY
-        generateValue: true
+        value: base64:ZN0KkKqwDmks315oQpF5mZPIzCIQrjf80gRgh+RFb5M=
       - key: LOG_CHANNEL
         value: stderr
       - key: LOG_LEVEL
         value: info
       - key: SESSION_DRIVER
         value: database
+      - key: SESSION_ENCRYPT
+        value: false
       - key: CACHE_STORE
         value: database
       - key: QUEUE_CONNECTION
@@ -59,6 +61,23 @@ services:
         value: tls
       - key: MAIL_FROM_NAME
         value: Signature Store
+      - key: APP_URL
+        fromService:
+          type: web
+          name: signature-backend
+          property: host
+      - key: SANCTUM_STATEFUL_DOMAINS
+        value: localhost,127.0.0.1,signature-backend-8cfs.onrender.com,signature-frontend-eta.vercel.app
+      - key: FRONTEND_URL
+        value: https://signature-frontend-eta.vercel.app
+      - key: FILESYSTEM_DISK
+        value: local
+      - key: BROADCAST_CONNECTION
+        value: log
+      - key: APP_LOCALE
+        value: en
+      - key: APP_FALLBACK_LOCALE
+        value: en
 
 databases:
   - name: signature-database
