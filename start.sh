@@ -2,12 +2,8 @@
 
 echo "Starting production deployment..."
 
-# Wait for database to be ready
-echo "Waiting for database connection..."
-until php artisan migrate:status > /dev/null 2>&1; do
-    echo "Waiting for database..."
-    sleep 2
-done
+# Wait for database to be ready using enhanced script
+./wait-for-db.sh
 
 # Generate application key if not exists
 if [ -z "$APP_KEY" ]; then

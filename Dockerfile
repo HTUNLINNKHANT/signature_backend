@@ -15,11 +15,17 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Install PHP extensions (including PostgreSQL)
-RUN docker-php-ext-install pdo_pgsql pgsql mbstring exif pcntl bcmath gd zip
+# Install PHP extensions (including PostgreSQL and your specified extensions)
+RUN docker-php-ext-install pdo_pgsql pgsql pdo mbstring exif pcntl bcmath gd zip
 
-# Get latest Composer
+# Configure PHP for memory optimization
+RUN echo "memory_limit = 512M" >> /usr/local/etc/php/conf.d/memory.ini \
+    && echo "max_execution_time = 300" >> /usr/local/etc/php/conf.d/memory.ini \
+    && echo "max_input_vars = 3000" >> /usr/local/etc/php/conf.d/memory.ini
+
+# Get latest Composer and set memory limit
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+ENV COMPOSER_MEMORY_LIMIT=1
 
 # Set working directory
 WORKDIR /var/www/html
@@ -28,7 +34,7 @@ WORKDIR /var/www/html
 COPY . /var/www/html
 
 # Make scripts executable
-RUN chmod +x build.sh start.sh
+RUN chmod +x build.sh start.sh wait-for-db.sh health-check.sh
 
 # Run the build script which handles composer install with fallbacks
 RUN ./build.sh
@@ -39,6 +45,10 @@ RUN chmod -R 775 storage bootstrap/cache
 
 # Expose port (Render will set PORT environment variable)
 EXPOSE $PORT
+
+# Add health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD ./health-check.sh || exit 1
 
 # Start Laravel application
 CMD ["./start.sh"]

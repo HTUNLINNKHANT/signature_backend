@@ -4,11 +4,11 @@ echo "Starting build process..."
 
 # Install dependencies with fallback approach
 echo "Installing Composer dependencies..."
-if ! composer install --no-dev --prefer-dist --no-progress --optimize-autoloader; then
+if ! COMPOSER_MEMORY_LIMIT=1 composer install --no-dev --prefer-dist --no-progress --optimize-autoloader; then
     echo "Optimized install failed, trying without optimization..."
-    composer install --no-dev --prefer-dist --no-progress
+    COMPOSER_MEMORY_LIMIT=1 composer install --no-dev --prefer-dist --no-progress
     echo "Generating optimized autoloader separately..."
-    composer dump-autoload --optimize
+    COMPOSER_MEMORY_LIMIT=1 composer dump-autoload --optimize
 fi
 
 # Generate application key if not exists

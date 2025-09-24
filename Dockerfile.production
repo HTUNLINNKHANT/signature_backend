@@ -1,0 +1,91 @@
+# Multi-stage build for production optimization
+FROM composer:2.7 AS composer-stage
+
+# Set memory limit for composer
+ENV COMPOSER_MEMORY_LIMIT=1
+
+WORKDIR /app
+
+# Copy composer files first for better caching
+COPY composer.json composer.lock ./
+
+# Install dependencies with memory optimization
+RUN composer install \
+    --no-dev \
+    --prefer-dist \
+    --no-progress \
+    --no-scripts \
+    --no-autoloader \
+    --optimize-autoloader
+
+# Copy application code
+COPY . .
+
+# Generate optimized autoloader
+RUN composer dump-autoload --optimize --no-dev
+
+# Production stage
+FROM php:8.3-fpm-alpine AS production
+
+# Install system dependencies
+RUN apk add --no-cache \
+    postgresql-dev \
+    libpng-dev \
+    libjpeg-turbo-dev \
+    freetype-dev \
+    libzip-dev \
+    oniguruma-dev \
+    nginx \
+    supervisor \
+    && rm -rf /var/cache/apk/*
+
+# Install PHP extensions (including your specified extensions)
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install \
+    pdo_pgsql \
+    pgsql \
+    pdo \
+    mbstring \
+    exif \
+    pcntl \
+    bcmath \
+    gd \
+    zip
+
+# Configure PHP for production with memory limits
+RUN echo "memory_limit = 256M" > /usr/local/etc/php/conf.d/memory.ini \
+    && echo "max_execution_time = 300" >> /usr/local/etc/php/conf.d/memory.ini \
+    && echo "max_input_vars = 3000" >> /usr/local/etc/php/conf.d/memory.ini \
+    && echo "opcache.enable=1" >> /usr/local/etc/php/conf.d/opcache.ini \
+    && echo "opcache.memory_consumption=128" >> /usr/local/etc/php/conf.d/opcache.ini \
+    && echo "opcache.max_accelerated_files=4000" >> /usr/local/etc/php/conf.d/opcache.ini \
+    && echo "opcache.revalidate_freq=60" >> /usr/local/etc/php/conf.d/opcache.ini
+
+# Set working directory
+WORKDIR /var/www/html
+
+# Copy application from composer stage
+COPY --from=composer-stage /app /var/www/html
+
+# Copy configuration files
+COPY nginx.conf /etc/nginx/nginx.conf
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+# Create necessary directories and set permissions
+RUN mkdir -p \
+    storage/logs \
+    storage/framework/cache \
+    storage/framework/sessions \
+    storage/framework/views \
+    bootstrap/cache \
+    && chown -R www-data:www-data /var/www/html \
+    && chmod -R 775 storage bootstrap/cache
+
+# Make scripts executable
+RUN chmod +x start.sh
+
+# Expose port
+EXPOSE $PORT
+
+# Start application
+CMD ["./start.sh"]
