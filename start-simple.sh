@@ -41,6 +41,17 @@ while [ $MIGRATION_ATTEMPTS -lt $MAX_MIGRATION_ATTEMPTS ]; do
     else
         MIGRATION_ATTEMPTS=$((MIGRATION_ATTEMPTS + 1))
         echo "⚠️ Migration attempt $MIGRATION_ATTEMPTS failed"
+        
+        # Check if it's the sessions table error
+        if php artisan migrate --force 2>&1 | grep -q "invalid input syntax for type bigint"; then
+            echo "🔧 Detected sessions table PostgreSQL error - attempting fix..."
+            if [ -f "./fix-sessions-table.sh" ]; then
+                ./fix-sessions-table.sh
+                echo "Sessions table fix attempted, retrying migration..."
+                continue
+            fi
+        fi
+        
         if [ $MIGRATION_ATTEMPTS -lt $MAX_MIGRATION_ATTEMPTS ]; then
             echo "Retrying in 5 seconds..."
             sleep 5

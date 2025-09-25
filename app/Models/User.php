@@ -108,7 +108,13 @@ class User extends Authenticatable
      */
     public function hasAnyRole(array $roles): bool
     {
-        return $this->roles()->whereIn('name', $roles)->exists();
+        try {
+            return $this->roles()->whereIn('name', $roles)->exists();
+        } catch (\Exception $e) {
+            // If database connection fails, log and return false
+            \Illuminate\Support\Facades\Log::warning('Database connection failed in hasAnyRole: ' . $e->getMessage());
+            return false;
+        }
     }
 
     /**
@@ -116,11 +122,17 @@ class User extends Authenticatable
      */
     public function hasPermission(string $permissionName): bool
     {
-        return $this->roles()
-            ->whereHas('permissions', function ($query) use ($permissionName) {
-                $query->where('name', $permissionName);
-            })
-            ->exists();
+        try {
+            return $this->roles()
+                ->whereHas('permissions', function ($query) use ($permissionName) {
+                    $query->where('name', $permissionName);
+                })
+                ->exists();
+        } catch (\Exception $e) {
+            // If database connection fails, log and return false
+            \Illuminate\Support\Facades\Log::warning('Database connection failed in hasPermission: ' . $e->getMessage());
+            return false;
+        }
     }
 
     /**

@@ -34,7 +34,7 @@ WORKDIR /var/www/html
 COPY . /var/www/html
 
 # Make scripts executable
-RUN chmod +x build.sh start.sh start-simple.sh wait-for-db.sh health-check.sh debug-composer.sh fix-composer-lock.sh debug-deployment.sh
+RUN chmod +x build.sh start.sh start-simple.sh start-minimal.sh wait-for-db.sh health-check.sh debug-composer.sh fix-composer-lock.sh debug-deployment.sh
 
 # Run the build script which handles composer install with fallbacks
 RUN ./build.sh
@@ -51,4 +51,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD ./health-check.sh || exit 1
 
 # Start Laravel application
-CMD ["./start-simple.sh"]
+CMD ["./start-minimal.sh"]

@@ -21,11 +21,20 @@ class CheckPermission
 
         $user = $request->user();
         
-        // Check if user has the required permission
-        if (!$user->hasPermission($permission)) {
+        try {
+            // Check if user has the required permission
+            if (!$user->hasPermission($permission)) {
+                return response()->json([
+                    'message' => 'Forbidden. Required permission: ' . $permission
+                ], 403);
+            }
+        } catch (\Exception $e) {
+            // If database is not ready or there's a connection issue, log and return 503
+            \Illuminate\Support\Facades\Log::warning('Permission check failed due to database issue: ' . $e->getMessage());
             return response()->json([
-                'message' => 'Forbidden. Required permission: ' . $permission
-            ], 403);
+                'message' => 'Service temporarily unavailable. Database connection issue.',
+                'error' => 'DATABASE_CONNECTION_ERROR'
+            ], 503);
         }
 
         return $next($request);
