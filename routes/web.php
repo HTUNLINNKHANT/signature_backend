@@ -15,3 +15,13 @@ Route::get('/', function () {
         ]
     ]);
 });
+
+// Simple health check endpoint for Render (no database dependency)
+Route::get('/up', function () {
+    return response()->json([
+        'status' => 'ok',
+        'timestamp' => now()->toISOString(),
+        'app' => 'Signature E-commerce',
+        'version' => '1.0.0'
+    ], 200);
+});

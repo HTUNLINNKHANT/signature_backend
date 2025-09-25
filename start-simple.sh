@@ -29,13 +29,27 @@ fi
 echo "⏳ Waiting for database connection..."
 sleep 5
 
-# Try to run migrations
+# Try to run migrations with retry logic
 echo "🔄 Running database migrations..."
-if php artisan migrate --force; then
-    echo "✅ Migrations completed successfully"
-else
-    echo "⚠️ Migrations failed, but continuing..."
-fi
+MIGRATION_ATTEMPTS=0
+MAX_MIGRATION_ATTEMPTS=3
+
+while [ $MIGRATION_ATTEMPTS -lt $MAX_MIGRATION_ATTEMPTS ]; do
+    if php artisan migrate --force; then
+        echo "✅ Migrations completed successfully"
+        break
+    else
+        MIGRATION_ATTEMPTS=$((MIGRATION_ATTEMPTS + 1))
+        echo "⚠️ Migration attempt $MIGRATION_ATTEMPTS failed"
+        if [ $MIGRATION_ATTEMPTS -lt $MAX_MIGRATION_ATTEMPTS ]; then
+            echo "Retrying in 5 seconds..."
+            sleep 5
+        else
+            echo "⚠️ All migration attempts failed, but continuing startup..."
+            echo "The application will start but database may not be properly initialized"
+        fi
+    fi
+done
 
 # Clear and optimize for production
 echo "⚡ Optimizing application..."
